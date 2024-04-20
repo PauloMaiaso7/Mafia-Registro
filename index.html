@@ -5,13 +5,102 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mafia-Registro</title>
   <style>
-    /* Seus estilos CSS... */
+    /* Estilos CSS */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2c3e50; /* Cor de fundo inspirada na Yakuza */
+      color: #fff;
+    }
+    header {
+      background-color: #34495e; /* Cor de fundo do cabeçalho */
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      margin: 20px;
+      background-color: #34495e; /* Cor de fundo dos contêineres */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .tab {
+      display: none;
+    }
+    button {
+      background-color: #34495e; /* Cor de fundo dos botões */
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin: 0 10px;
+      transition: background-color 0.3s;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Fonte do botão */
+      font-weight: bold; /* Negrito */
+    }
+    button:hover {
+      background-color: #2c3e50; /* Cor de fundo dos botões ao passar o mouse */
+    }
+    button.active {
+      background-color: #2c3e50; /* Cor de fundo dos botões ativos */
+    }
+    label {
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    input[type="password"],
+    input[type="submit"] {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    h2 {
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #2c3e50; /* Cor de fundo da tabela */
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #fff; /* Cor da borda da tabela */
+      text-align: left;
+    }
+    th {
+      background-color: #34495e; /* Cor de fundo do cabeçalho da tabela */
+      color: #fff;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1 style="font-size: 36px;">Mafia Gestao-Registro</h1>
+  <h1 style="font-size: 36px;">Mafia-Registro</h1>
   <button onclick="openTab(event, 'registro')">Registrar Venda</button>
   <button onclick="openTab(event, 'informacoes')">Informações</button>
 </header>
@@ -50,7 +139,6 @@
         </tr>
       </table>
     </div>
-    <button onclick="limparRegistros()">Limpar Registros</button>
   </div>
 </div>
 
@@ -94,98 +182,75 @@
 </div>
 
 <script>
-  // Função para abrir abas...
-  // Função para limpar os registros...
-  // Função para exibir os registros...
-  // Função para registrar uma venda...
+  // Função para abrir abas
+  function openTab(event, tabName) {
+    // Ocultar todas as abas
+    const tabs = document.getElementsByClassName("tab");
+    for (let i = 0; i < tabs.length; i++) {
+      tabs[i].style.display = "none";
+    }
 
-  // Função para abrir a conexão com o banco de dados IndexedDB
-  function abrirBancoDados() {
-    return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open('registrosDB', 1);
+    // Obter o conteúdo da aba a ser exibida e mostrá-lo
+    const content = document.getElementById(tabName);
+    content.style.display = "block";
+  }
 
-      request.onerror = function(event) {
-        console.error('Erro ao abrir o banco de dados:', event.target.error);
-        reject(event.target.error);
-      };
-
-      request.onsuccess = function(event) {
-        console.log('Banco de dados aberto com sucesso.');
-        const db = event.target.result;
-        resolve(db);
-      };
-
-      request.onupgradeneeded = function(event) {
-        const db = event.target.result;
-        const objectStore = db.createObjectStore('registros', { keyPath: 'id', autoIncrement: true });
-        console.log('Banco de dados atualizado.');
-      };
+  // Função para exibir os registros de venda
+  function exibirRegistros() {
+    const tabelaRegistros = document.getElementById('tabelaRegistros');
+    const registros = JSON.parse(localStorage.getItem('registros')) || [];
+    tabelaRegistros.innerHTML = `
+      <tr>
+        <th>Vendedor</th>
+        <th>Mercadoria</th>
+        <th>Quantidade</th>
+        <th>Preço Negociado</th>
+      </tr>
+    `;
+    registros.forEach(registro => {
+      const newRow = tabelaRegistros.insertRow(-1);
+      newRow.insertCell(0).textContent = registro.vendedor;
+      newRow.insertCell(1).textContent = registro.mercadoria;
+      newRow.insertCell(2).textContent = registro.quantidade;
+      newRow.insertCell(3).textContent = registro.preco;
     });
   }
 
-  // Função para adicionar um registro ao banco de dados IndexedDB
-  function adicionarRegistroIndexedDB(registro) {
-    abrirBancoDados().then(db => {
-      const transaction = db.transaction(['registros'], 'readwrite');
-      const objectStore = transaction.objectStore('registros');
-      const request = objectStore.add(registro);
-      
-      request.onsuccess = function(event) {
-        console.log('Registro adicionado ao banco de dados.');
-        exibirRegistros();
+  // Função para registrar uma venda
+  function registrarVenda() {
+    const vendedor = document.getElementById('vendedor').value;
+    const mercadoria = document.getElementById('mercadoria').value;
+    const quantidade = document.getElementById('quantidade').value;
+    const preco = document.getElementById('preco').value;
+
+    // Validar se todos os campos foram preenchidos
+    if (vendedor && mercadoria && quantidade && preco) {
+      // Criar objeto com os dados da venda
+      const venda = {
+        vendedor: vendedor,
+        mercadoria: mercadoria,
+        quantidade: quantidade,
+        preco: preco
       };
 
-      request.onerror = function(event) {
-        console.error('Erro ao adicionar registro:', event.target.error);
-      };
-    }).catch(error => {
-      console.error('Erro ao abrir o banco de dados:', error);
-    });
+      // Recuperar registros anteriores ou inicializar um array vazio
+      let registros = JSON.parse(localStorage.getItem('registros')) || [];
+
+      // Adicionar nova venda aos registros
+      registros.push(venda);
+
+      // Salvar registros no localStorage
+      localStorage.setItem('registros', JSON.stringify(registros));
+
+      // Atualizar a exibição dos registros na tabela
+      exibirRegistros();
+    } else {
+      alert('Por favor, preencha todos os campos.');
+    }
   }
 
-  // Função para exibir os registros do banco de dados IndexedDB
-  function exibirRegistrosIndexedDB() {
-    abrirBancoDados().then(db => {
-      const objectStore = db.transaction('registros').objectStore('registros');
-      const registros = [];
-
-      objectStore.openCursor().onsuccess = function(event) {
-        const cursor = event.target.result;
-
-        if (cursor) {
-          registros.push(cursor.value);
-          cursor.continue();
-        } else {
-          exibirRegistros(registros);
-        }
-      };
-    }).catch(error => {
-      console.error('Erro ao abrir o banco de dados:', error);
-    });
-  }
-
-  // Função para limpar os registros do banco de dados IndexedDB
-  function limparRegistrosIndexedDB() {
-    abrirBancoDados().then(db => {
-      const transaction = db.transaction(['registros'], 'readwrite');
-      const objectStore = transaction.objectStore('registros');
-      const request = objectStore.clear();
-
-      request.onsuccess = function(event) {
-        console.log('Registros removidos do banco de dados.');
-        exibirRegistros();
-      };
-
-      request.onerror = function(event) {
-        console.error('Erro ao limpar registros:', event.target.error);
-      };
-    }).catch(error => {
-      console.error('Erro ao abrir o banco de dados:', error);
-    });
-  }
-
-  // Ao carregar a página, exibe os registros salvos no IndexedDB
-  exibirRegistrosIndexedDB();
+  // Ao carregar a página, exibe os registros salvos
+  exibirRegistros();
 </script>
 
 </body>
