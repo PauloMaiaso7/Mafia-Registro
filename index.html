@@ -183,88 +183,29 @@
 </div>
 
 <script>
-  // Função para abrir abas
-  function openTab(event, tabName) {
-    // Ocultar todas as abas
-    const tabs = document.getElementsByClassName("tab");
-    for (let i = 0; i < tabs.length; i++) {
-      tabs[i].style.display = "none";
-    }
-
-    // Obter o conteúdo da aba a ser exibida e mostrá-lo
-    const content = document.getElementById(tabName);
-    content.style.display = "block";
+  // Função para abrir abas...
+  // Função para limpar os registros...
+  // Função para exibir os registros...
+  // Função para registrar uma venda...
+  
+  // Funções para banco de dados local
+  function salvarRegistros(registros) {
+    localStorage.setItem('registros', JSON.stringify(registros));
   }
 
-  // Função para limpar os registros de venda
+  function carregarRegistros() {
+    return JSON.parse(localStorage.getItem('registros')) || [];
+  }
+
+  function adicionarRegistro(registro) {
+    const registros = carregarRegistros();
+    registros.push(registro);
+    salvarRegistros(registros);
+  }
+
   function limparRegistros() {
     localStorage.removeItem('registros');
     exibirRegistros(); // Limpa a tabela
-  }
-
-  // Função para exibir os registros de venda
-  function exibirRegistros() {
-    const tabelaRegistros = document.getElementById('tabelaRegistros');
-    const registros = JSON.parse(localStorage.getItem('registros')) || [];
-    tabelaRegistros.innerHTML = `
-      <tr>
-        <th>Vendedor</th>
-        <th>Mercadoria</th>
-        <th>Quantidade</th>
-        <th>Preço Negociado</th>
-      </tr>
-    `;
-    registros.forEach(registro => {
-      const newRow = tabelaRegistros.insertRow(-1);
-      newRow.insertCell(0).textContent = registro.vendedor;
-      newRow.insertCell(1).textContent = registro.mercadoria;
-      newRow.insertCell(2).textContent = registro.quantidade;
-      newRow.insertCell(3).textContent = registro.preco;
-    });
-  }
-
-  // Função para registrar uma venda
-  function registrarVenda() {
-    const vendedor = document.getElementById('vendedor').value;
-    const mercadoria = document.getElementById('mercadoria').value;
-    const quantidade = document.getElementById('quantidade').value;
-    const preco = document.getElementById('preco').value;
-
-    // Validar se todos os campos foram preenchidos
-    if (vendedor && mercadoria && quantidade && preco) {
-      // Construir a URL para enviar os dados para o servidor
-      const url = 'url_do_seu_servidor/registrar_venda.php'; // Substitua 'url_do_seu_servidor' pelo endereço do seu servidor PHP
-
-      // Construir o corpo da requisição
-      const data = new URLSearchParams();
-      data.append('vendedor', vendedor);
-      data.append('mercadoria', mercadoria);
-      data.append('quantidade', quantidade);
-      data.append('preco', preco);
-
-      // Enviar a requisição para o servidor usando fetch API
-      fetch(url, {
-        method: 'POST',
-        body: data
-      })
-      .then(response => response.json())
-      .then(result => {
-        // Se o registro foi salvo com sucesso, exibir uma mensagem e atualizar a tabela de registros
-        if (result.success) {
-          alert('Venda registrada com sucesso!');
-          // Atualizar a tabela de registros
-          exibirRegistros();
-        } else {
-          alert('Ocorreu um erro ao registrar a venda. Por favor, tente novamente.');
-        }
-      })
-      .catch(error => {
-        console.error('Erro ao enviar requisição:', error);
-        alert('Ocorreu um erro ao registrar a venda. Por favor, tente novamente.');
-      });
-    } else {
-      alert('Por favor, preencha todos os campos.');
-    }
   }
 
   // Ao carregar a página, exibe os registros salvos
